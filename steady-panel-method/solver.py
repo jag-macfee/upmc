@@ -9,7 +9,7 @@ from utils import A_flat_plate_steady
 # v_o - the gust velocity (velocity component of flow parallel to y axis) in m/s
 # c - cord length in m
 # n_panels - number of panels (and thus control points)
-def solve_flat_plate(v_o, c, n_panels):
+def solve_flat_plate_spm(v_o, c, n_panels):
     # Vortex positions zeta_n as denoted in Lysak
     zeta = np.array([(c * (n - 1) / n_panels) for n in range(1, n_panels + 2)])
 

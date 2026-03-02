@@ -1,28 +1,26 @@
-from solver import solve_flat_plate
+from solver import solve_flat_plate_spm
 import matplotlib.pyplot as plt
 import numpy as np
+from utils import spm_flat_plate_gamma
 
 v_o = 1
 c = 1
-N = 50
+N = 1000
 panel_width = c / N
 
-gamma, zeta, x_abs = solve_flat_plate(v_o, c, N)
+gamma, zeta, x_abs = solve_flat_plate_spm(v_o, c, N)
 
 # Convert to circulation per unit length
 gamma_adjusted = gamma / (v_o * panel_width)
-x_rel = x_abs / c
-
-# Theoretical solution
-gamma_theoretical = lambda x: 2 * np.sqrt((1 - x / c) / (x / c))
+rel_vortex_positions = zeta[:-1] / c  # Remove last zeta as we are ignoring
 
 eps = 1e-6 * c
 x = np.linspace(eps, c, 500)  # includes endpoint by default
-gamma_theoret = gamma_theoretical(x) / v_o
+gamma_theoret = spm_flat_plate_gamma(x, c)
 x_theoret_rel = x / c
 
 # Plot both on the same axes
-plt.scatter(x_rel, gamma_adjusted, label="Numerical solution")
+plt.scatter(rel_vortex_positions, gamma_adjusted, label="Numerical solution")
 plt.plot(x_theoret_rel, gamma_theoret, label="Theoretical solution")
 
 plt.xlabel("Position x/c")

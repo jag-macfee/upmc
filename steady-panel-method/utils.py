@@ -3,6 +3,13 @@
 import numpy as np
 
 
+# Theoretical solution for circulation per unit length
+# For (s)teady (p)anel (m)ethod flat plate
+# Normalised for v_o
+def spm_flat_plate_gamma(x, c):
+    return 2 * np.sqrt((1 - x / c) / (x / c))
+
+
 # Gives the magnitude of the velocity vector induced by a point vertex of strength gamma
 def vort_vel(gamma, r):
     return gamma / (2 * np.pi * r)
