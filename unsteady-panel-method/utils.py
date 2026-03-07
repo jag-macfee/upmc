@@ -10,7 +10,7 @@ def upm_flat_plate_gamma(x, c):
 
 # Gets the A matrix associated with the removed kutta condition steady state solution
 # Lysak p.18
-def A_flat_plate_no_kutta(zeta, x):
+def A_flat_plate_no_kutta_init(zeta, x):
     n_vortices = len(zeta)
     num_panels = len(x)
 

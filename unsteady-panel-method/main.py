@@ -1,4 +1,4 @@
-from solver import solve_flat_plate_no_kutta
+from solver import solve_flat_plate_upm
 import matplotlib.pyplot as plt
 import numpy as np
 from utils import upm_flat_plate_gamma
@@ -8,7 +8,7 @@ c = 1
 N = 1000
 panel_width = c / N
 
-gamma, zeta, x_abs = solve_flat_plate_no_kutta(v_o, c, N)
+gamma, zeta, x_abs = solve_flat_plate_upm(v_o, c, N)
 
 # Convert to circulation per unit length
 gamma_adjusted = gamma / (v_o * panel_width)
