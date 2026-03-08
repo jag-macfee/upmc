@@ -32,3 +32,30 @@ def calculate_A_row(zeta, x, n):
 
     # Kutta condition allows us to ignore last vortex in zeta arr
     return [1 / (zeta[i] - x[n - 1]) for i in range(0, num_vortices - 1)]
+
+
+# Given a vortex strength gamma, the coordinates of the vortex (x_j, z_j),
+# calculates the velocity (u, w) of a point P(x, z) induced by the vortex
+# Katz p. 223, matrix equation
+# As used in Katz, will call the method vor2D
+def vor2D(gamma, x, z, x_j, z_j):
+    r_squared = (x - x_j) ** 2 + (z - z_j) ** 2
+
+    # Might move this to global var to avoid redeclaring
+    rhs_mat = np.array([[0, 1], [-1, 0]])
+    rhs_vec = np.array([x - x_j, z - z_j])
+
+    v = gamma / (2 * np.pi * r_squared) * (rhs_mat @ rhs_vec)
+    return v
+
+
+# Given a panel defined by two endpoints (vortex positions), return a unit vector
+# normal to it
+def normal_vec_to_panel(p1: tuple, p2: tuple):
+    (x1, z1) = p1
+    (x2, z2) = p2
+
+    panel_vec = [x2 - x1, z2 - z1]
+    n = np.array([-panel_vec[1], panel_vec[0]])
+
+    return 1 / (np.sqrt(n.dot(n))) * n
