@@ -12,8 +12,8 @@ class Airfoil:
         self.c = c
 
     def camber(self, x):
-        """Makes airfoil objects callable, returning the y-coordinate of the
-        mean camber line at a given x-station."""
+        """Returns the y-coordinate of the
+        mean camber line at a given x coord"""
         raise NotImplementedError("Subclasses should implement this method.")
 
 
@@ -36,18 +36,19 @@ class Naca4Digit(Airfoil):
         self.p = c * float(digits[1]) / 10
 
     def camber(self, x):
+        x = np.asarray(x)
+
         # Check bounds for undefined behaviour
-        if x < 0 or x > self.c:
+        if np.any(x < 0) or np.any(x > self.c):
             raise ValueError(
-                f"Position {x} is undefined for airfoil with chord length {self.c}"
+                f"Position is undefined for airfoil with chord length {self.c}"
             )
 
-        # Case: x is before max camber
-        if x >= 0 and x <= self.p:
-            return self.m / (self.p**2) * (2 * self.p * x - x**2)
+        # Piecewise camber line eq
+        eq1 = self.m / (self.p**2) * (2 * self.p * x - x**2)
+        eq2 = self.m / ((1 - self.p) ** 2) * ((1 - 2 * self.p) + 2 * self.p * x - x**2)
 
-        # Case: x is after max camber
-        return self.m / ((1 - self.p) ** 2) * ((1 - 2 * self.p) + 2 * self.p * x - x**2)
+        return np.where(x <= self.p, eq1, eq2)
 
 
 # Given a string code (eg. "2415"), return a function
