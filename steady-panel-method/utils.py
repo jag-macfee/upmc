@@ -63,7 +63,7 @@ def vor2D(gamma, x, z, x_j, z_j):
     return v
 
 
-# Given a panel defined by two endpoints (vortex positions), return a unit vector
+# Given a panel defined by two points, return a unit vector
 # normal to it
 def normal_vec_to_panel(p1: np.array, p2: np.array):
     (x1, z1) = p1
