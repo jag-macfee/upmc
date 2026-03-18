@@ -27,3 +27,8 @@ def calculate_A_row(zeta, x, n):
     num_vortices = len(zeta)
 
     return [1 / (zeta[i] - x[n - 1]) for i in range(0, num_vortices)]
+
+
+# Gets zeta of the ith vortex in the wake
+def wake_vortex_position(zeta_last, panel_width, i):
+    return zeta_last + panel_width * i
