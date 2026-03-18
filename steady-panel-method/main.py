@@ -11,7 +11,7 @@ from naca import naca
 
 # --- Running solver and plotting results ---
 airfoil_code = "4412"
-n_panels = 100
+n_panels = 20
 chord_length = 1.0
 panel_width = chord_length / n_panels
 
