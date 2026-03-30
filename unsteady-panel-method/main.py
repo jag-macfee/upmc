@@ -3,15 +3,26 @@ from solver import solve_flat_plate_unsteady
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
+import sys
 
 U_inf = 1
 c = 1
-n_panels = 100
+n_panels = 50
 k_max = 100
 panel_width = c / n_panels
+delta_t = panel_width / U_inf
 
-v_gust = lambda t: 1
 
+# Have to make sure dirac is shifted for x_n rather than gamma_n
+# Note: Due to floating-point precision in calculation of t and delta_t,
+# we have to acknowledge their difference to be system eps
+def dirac(t):
+    if abs(t - 0.5 * delta_t) <= sys.float_info.epsilon:
+        return 1
+    return 0
+
+
+v_gust = lambda t: dirac(t)
 
 start_time = time.time()
 gamma, gamma_wake, zeta, zeta_wake = solve_flat_plate_unsteady(
@@ -69,44 +80,44 @@ ax.set_title("Gamma Distribution over Time")
 
 plt.show()
 
-# # Plot gamma distributions
-# plt.figure()
+# Plot gamma distributions
+plt.figure()
 
-# # Timesteps to plot
-# timesteps_to_plot = [
-#     0,
-#     k_max // 4,
-#     k_max // 2,
-#     3 * k_max // 4,
-#     k_max - 1,
-# ]
-# labels = ["first", "quarter", "half", "three-quarter", "last"]
+# Timesteps to plot
+timesteps_to_plot = [
+    0,
+    k_max // 4,
+    k_max // 2,
+    3 * k_max // 4,
+    k_max - 1,
+]
+labels = ["first", "quarter", "half", "three-quarter", "last"]
 
-# for i, k in enumerate(timesteps_to_plot):
-#     # Combine bound and wake gammas
-#     gamma_k = gamma[k, :]
-#     gamma_wake_k = gamma_wake[k, :k]
-#     full_gamma = np.concatenate((gamma_k, gamma_wake_k))
+for i, k in enumerate(timesteps_to_plot):
+    # Combine bound and wake gammas
+    gamma_k = gamma[k, :]
+    gamma_wake_k = gamma_wake[k, :k]
+    full_gamma = np.concatenate((gamma_k, gamma_wake_k))
 
-#     # Combine bound and wake zetas
-#     zeta_wake_k = zeta_wake[k, :k]
-#     full_zeta = np.concatenate((zeta, zeta_wake_k))
+    # Combine bound and wake zetas
+    zeta_wake_k = zeta_wake[k, :k]
+    full_zeta = np.concatenate((zeta, zeta_wake_k))
 
-#     # Sort by zeta for a clean plot
-#     sort_indices = np.argsort(full_zeta)
-#     full_zeta_sorted = full_zeta[sort_indices]
-#     full_gamma_sorted = full_gamma[sort_indices]
+    # Sort by zeta for a clean plot
+    sort_indices = np.argsort(full_zeta)
+    full_zeta_sorted = full_zeta[sort_indices]
+    full_gamma_sorted = full_gamma[sort_indices]
 
-#     plt.plot(
-#         full_zeta_sorted,
-#         full_gamma_sorted / panel_width,
-#         label=f"k = {k+1} ({labels[i]})",
-#     )
+    plt.plot(
+        full_zeta_sorted,
+        full_gamma_sorted / panel_width,
+        label=f"k = {k+1} ({labels[i]})",
+    )
 
 
-# plt.xlabel("zeta")
-# plt.ylabel("Circulation density")
-# plt.title("Gamma Distribution at Different Timesteps")
-# plt.legend()
-# plt.grid(True)
-# plt.show()
+plt.xlabel("zeta")
+plt.ylabel("Circulation density")
+plt.title("Gamma Distribution at Different Timesteps")
+plt.legend()
+plt.grid(True)
+plt.show()
