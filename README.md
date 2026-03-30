@@ -1,5 +1,9 @@
 # Unsteady Panel Method Computer
 
+## Versions
+
+- **v1 (current)**: Calculates the circulation density distribution along a flat plate given a chosen number of panels and time steps to perform.
+
 ## Overview
 
 This project implements panel method solutions for analyzing airfoil behavior in unsteady flow conditions. The code solves for circulation distributions on flat plate airfoils experiencing gust and turbulent flow using both steady and unsteady panel methods.
