@@ -5,10 +5,10 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import sys
 
-U_inf = 1
-c = 1
-n_panels = 50
-k_max = 100
+U_inf = 5
+c = 2
+n_panels = 150
+k_max = 2 * n_panels  # Length of the wake in terms of panels
 panel_width = c / n_panels
 delta_t = panel_width / U_inf
 
@@ -17,12 +17,15 @@ delta_t = panel_width / U_inf
 # Note: Due to floating-point precision in calculation of t and delta_t,
 # we have to acknowledge their difference to be system eps
 def dirac(t):
-    if abs(t - 0.5 * delta_t) <= sys.float_info.epsilon:
+    if abs(t) <= sys.float_info.epsilon:
         return 1
     return 0
 
 
-v_gust = lambda t: dirac(t)
+# Have gusts with magnitude one for now, we will sort out normalising later
+# will need to normalise with respect to each zeta position
+half_chord_per_cycle_omega = 2 * np.pi / (0.5 * c / U_inf)
+v_gust = lambda t: np.cos(half_chord_per_cycle_omega * t) * np.heaviside(t, 1)
 
 start_time = time.time()
 gamma, gamma_wake, zeta, zeta_wake = solve_flat_plate_unsteady(
@@ -30,6 +33,12 @@ gamma, gamma_wake, zeta, zeta_wake = solve_flat_plate_unsteady(
 )
 end_time = time.time()
 print(f"Solver execution time: {end_time - start_time:.4f} seconds")
+
+# normalise
+gamma = gamma / panel_width
+gamma_wake = gamma_wake / panel_width
+zeta = zeta / c
+zeta_wake = zeta_wake / c
 
 # 3D plot of gamma distribution over time
 fig = plt.figure()
@@ -60,7 +69,7 @@ for k in range(k_max):
 
     num_points = len(full_zeta_sorted)
     zeta_grid[k, :num_points] = full_zeta_sorted
-    gamma_grid[k, :num_points] = full_gamma_sorted / panel_width
+    gamma_grid[k, :num_points] = full_gamma_sorted
     k_grid[k, :num_points] = k + 1  # Use 1-indexed timesteps for plotting
 
     # Pad the rest of the row with the last value to make a rectangular grid for the surface plot
@@ -73,7 +82,7 @@ for k in range(k_max):
 # Plot the surface
 ax.plot_surface(zeta_grid, k_grid, gamma_grid, cmap="viridis")
 
-ax.set_xlabel("zeta (Position)")
+ax.set_xlabel("zeta (Position x/c)")
 ax.set_ylabel("k (Timestep)")
 ax.set_zlabel("gamma / panel_width")
 ax.set_title("Gamma Distribution over Time")
@@ -110,12 +119,12 @@ for i, k in enumerate(timesteps_to_plot):
 
     plt.plot(
         full_zeta_sorted,
-        full_gamma_sorted / panel_width,
+        full_gamma_sorted,
         label=f"k = {k+1} ({labels[i]})",
     )
 
 
-plt.xlabel("zeta")
+plt.xlabel("zeta (x/c)")
 plt.ylabel("Circulation density")
 plt.title("Gamma Distribution at Different Timesteps")
 plt.legend()
