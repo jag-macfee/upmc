@@ -21,7 +21,7 @@ Q_inf_magnitude = 1.0
 Q_inf = np.array([Q_inf_magnitude * np.cos(alpha), Q_inf_magnitude * np.sin(alpha)])
 
 # Get the solution from the solver
-gamma, zeta_points, collocation_points = solve_naca_airfoil_camberline(
+gamma, xi_points, collocation_points = solve_naca_airfoil_camberline(
     airfoil_code, chord_length, n_panels, Q_inf
 )
 
@@ -33,11 +33,11 @@ y_theory = airfoil.camber(x_theory)
 plt.figure(figsize=(12, 8))
 plt.plot(x_theory, y_theory, "k-", label=f"NACA {airfoil_code} Camber Line")
 plt.scatter(
-    zeta_points[:, 0],
-    zeta_points[:, 1],
+    xi_points[:, 0],
+    xi_points[:, 1],
     marker="o",
     color="blue",
-    label="Vortex Points (zeta)",
+    label="Vortex Points (xi)",
     s=80,
 )
 plt.scatter(
@@ -59,7 +59,7 @@ plt.show()
 # --- Plot 2: Gamma Distribution ---
 plt.figure(figsize=(10, 6))
 plt.plot(
-    zeta_points[:, 0],
+    xi_points[:, 0],
     gamma / panel_width,
     "o-",
     label="Numerical gamma / panel width",

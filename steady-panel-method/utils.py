@@ -23,22 +23,22 @@ def vort_vel(gamma, r):
 
 
 # Gives the A matrix in the flat plate steady panel case
-# Takes in zeta and x vectors
-def A_flat_plate_steady(zeta, x):
+# Takes in xi and x vectors
+def A_flat_plate_steady(xi, x):
     num_panels = len(x)
-    A_mat = np.array([calculate_A_row(zeta, x, i) for i in range(1, num_panels + 1)])
+    A_mat = np.array([calculate_A_row(xi, x, i) for i in range(1, num_panels + 1)])
 
     return (1 / (2 * np.pi)) * A_mat
 
 
 # Returns the nth row of the A matrix (helper for fn above)
-# Takes in zeta, x, and n
+# Takes in xi, x, and n
 # Note: n is 1-indexed in input, so we adjust it in the calc
-def calculate_A_row(zeta, x, n):
-    num_vortices = len(zeta)
+def calculate_A_row(xi, x, n):
+    num_vortices = len(xi)
 
-    # Kutta condition allows us to ignore last vortex in zeta arr
-    return [1 / (zeta[i] - x[n - 1]) for i in range(0, num_vortices - 1)]
+    # Kutta condition allows us to ignore last vortex in xi arr
+    return [1 / (xi[i] - x[n - 1]) for i in range(0, num_vortices - 1)]
 
 
 ##############################################################################################
@@ -79,12 +79,12 @@ def normal_vec_to_panel(p1: np.array, p2: np.array):
 # create the 'a' matrix as used in Katz
 # This is the 'influence coefficient matrix' which will be used to solve for the linear system
 # and represents summations of induced vortex velocities at each collocation point
-def construct_a_matrix(zeta_points, collocation_points):
-    n_vortices = len(zeta_points)
+def construct_a_matrix(xi_points, collocation_points):
+    n_vortices = len(xi_points)
 
     a_mat = np.array(
         [
-            construct_a_matrix_row(i, zeta_points, collocation_points)
+            construct_a_matrix_row(i, xi_points, collocation_points)
             for i in range(1, n_vortices + 1)
         ]
     )
@@ -94,19 +94,19 @@ def construct_a_matrix(zeta_points, collocation_points):
 
 # Returns the ith row of the 'a' matrix
 # Note: i is passed in 1-indexed so we adjust for appropriate position
-def construct_a_matrix_row(i, zeta_points, collocation_points):
+def construct_a_matrix_row(i, xi_points, collocation_points):
     # Panels can be defined with 2 points: vortex i and collocation point i
-    vortex_i = zeta_points[i - 1]
+    vortex_i = xi_points[i - 1]
     collocation_point_i = collocation_points[i - 1]
 
     n_i = normal_vec_to_panel(vortex_i, collocation_point_i)
 
-    # Construct row left to right, iterating over all vortices (in zeta) j
+    # Construct row left to right, iterating over all vortices (in xi) j
     x_ci = collocation_point_i[0]
     z_ci = collocation_point_i[1]
 
     row = []
-    for vortex_point in zeta_points:
+    for vortex_point in xi_points:
         x_0j = vortex_point[0]
         z_0j = vortex_point[1]
 
@@ -121,14 +121,14 @@ def construct_a_matrix_row(i, zeta_points, collocation_points):
 # Constructs the RHS vector in the steady panel method matrix eq.
 # Represents the component of the freestream velocity normal to each panel at
 # each collocation point i
-def construct_rhs_vector_b(Q_inf, zeta_points, collocation_points):
+def construct_rhs_vector_b(Q_inf, xi_points, collocation_points):
     # Construct entries one by one
     b = []
 
     n_collocation_points = len(collocation_points)
     for i in range(1, n_collocation_points + 1):
         # Panels can be defined with 2 points: vortex i and collocation point i
-        vortex_i = zeta_points[i - 1]
+        vortex_i = xi_points[i - 1]
         collocation_point_i = collocation_points[i - 1]
 
         n_i = normal_vec_to_panel(vortex_i, collocation_point_i)

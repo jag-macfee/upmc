@@ -17,14 +17,14 @@ from naca import naca
 # c - cord length in m
 # n_panels - number of panels (and thus control points)
 def solve_flat_plate_spm(v_o, c, n_panels):
-    # Vortex positions zeta_n as denoted in Lysak
-    zeta = np.array([(c * (n - 1) / n_panels) for n in range(1, n_panels + 2)])
+    # Vortex positions xi_n as denoted in Lysak
+    xi = np.array([(c * (n - 1) / n_panels) for n in range(1, n_panels + 2)])
 
     # Control points, denoted by x_n in Lysak
     x = np.array([c * (n - 0.5) / n_panels for n in range(1, n_panels + 1)])
 
     # A matrix
-    A_mat = A_flat_plate_steady(zeta, x)
+    A_mat = A_flat_plate_steady(xi, x)
 
     # b vector
     b = np.full(n_panels, -v_o)
@@ -32,7 +32,7 @@ def solve_flat_plate_spm(v_o, c, n_panels):
     # solve
     gamma = np.linalg.solve(A_mat, b)
 
-    return gamma, zeta, x
+    return gamma, xi, x
 
 
 # Solve for the gamma vector for a NACA airfoil mean camber line (thin airfoil assumption)
@@ -53,10 +53,10 @@ def solve_naca_airfoil_camberline(airfoil_digits: str, c, n_panels, Q_inf: np.ar
 
     # Vortex positions
     # Ignore TE vortex for now
-    zeta_x = np.array([(c * (n - 1) / n_panels) for n in range(1, n_panels + 1)])
-    zeta_z = np.array(airfoil.camber(zeta_x))
+    xi_x = np.array([(c * (n - 1) / n_panels) for n in range(1, n_panels + 1)])
+    xi_z = np.array(airfoil.camber(xi_x))
 
-    zeta_points = np.column_stack((zeta_x, zeta_z))
+    xi_points = np.column_stack((xi_x, xi_z))
 
     # Collocation point positions
     collocation_x = np.array([c * (n - 0.5) / n_panels for n in range(1, n_panels + 1)])
@@ -65,14 +65,14 @@ def solve_naca_airfoil_camberline(airfoil_digits: str, c, n_panels, Q_inf: np.ar
     collocation_points = np.column_stack((collocation_x, collocation_z))
 
     # Construct 'a' matrix (influence coeff. matrix)
-    a_mat = construct_a_matrix(zeta_points, collocation_points)
-    rhs_b = construct_rhs_vector_b(Q_inf, zeta_points, collocation_points)
+    a_mat = construct_a_matrix(xi_points, collocation_points)
+    rhs_b = construct_rhs_vector_b(Q_inf, xi_points, collocation_points)
 
     gamma_sol = np.linalg.solve(a_mat, rhs_b)
 
     # Add last vortex on the end, with 0 circulation for Kutta condition.
     # Preserve (N, 2) shape when appending the TE point.
     gamma_sol = np.append(gamma_sol, 0)
-    zeta_points = np.vstack((zeta_points, np.array([c, 0.0])))
+    xi_points = np.vstack((xi_points, np.array([c, 0.0])))
 
-    return gamma_sol, zeta_points, collocation_points
+    return gamma_sol, xi_points, collocation_points
